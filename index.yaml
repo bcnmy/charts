@@ -1,0 +1,23 @@
+apiVersion: v1
+entries:
+  gcp-iam-externalsecrets:
+  - apiVersion: v1
+    created: "2024-02-28T15:45:07.568372552Z"
+    description: A Helm chart to create a service account in your desired project,
+      and grant it a specific role.
+    digest: f0c72ec6c007db5d3f3082d516af66320feb53c42d40656dd3201b5dcdadf606
+    name: gcp-iam-externalsecrets
+    urls:
+    - https://github.com/bcnmy/charts/releases/download/gcp-iam-externalsecrets-0.0.1/gcp-iam-externalsecrets-0.0.1.tgz
+    version: 0.0.1
+  universal-helm:
+  - apiVersion: v2
+    created: "2024-02-28T15:45:07.727776001Z"
+    description: A Universal Helm chart
+    digest: 316377b7538afd182f5241bd22b81690a9d74938c597c2f374337be1d4b4b0aa
+    name: universal-helm
+    type: application
+    urls:
+    - https://github.com/bcnmy/charts/releases/download/universal-helm-0.0.1/universal-helm-0.0.1.tgz
+    version: 0.0.1
+generated: "2024-02-28T15:45:07.727780501Z"
