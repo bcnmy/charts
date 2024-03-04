@@ -54,7 +54,7 @@ jobs:
         uses: helm/chart-releaser-action@v1.6.0
         with:
           charts_dir: charts
-          packages_with_index: true
+          packages_with_index: false
         env:
           CR_TOKEN: "${{ secrets.CR_TOKEN }}"
           CR_SKIP_EXISTING: "true"
