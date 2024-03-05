@@ -23,10 +23,11 @@ spec:
   ports:
     - port: {{ $prt.port }}
       targetPort: {{ $prt.port }}
-      protocol: {{ $prt.protocol
+      protocol: {{ $prt.protocol }}
       name: {{ $prt.name }}
 
-
+{{- end -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
