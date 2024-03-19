@@ -119,7 +119,7 @@ spec:
 
         - name: {{ $cntnr.name }}
           image: "{{ $cntnr.image.repository }}:{{ $cntnr.image.tag }}"
-          imagePullPolicy: {{ default "IfNotPresent" $.Values.global.imagePullPolicy }}
+          imagePullPolicy: {{ default "IfNotPresent" $cntnr.image.imagePullPolicy}}
 
           {{- with $cntnr.envFrom }}
           envFrom: {{- toYaml . | nindent 12}}
