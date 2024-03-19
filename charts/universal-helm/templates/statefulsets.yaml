@@ -1,19 +1,19 @@
 {{- range $ksts, $sts := $.Values.statefulset }}
 {{- $volumeName := printf "%s-data" $sts.name }}
 
-{{- $stsCMNames := list }}
-{{- range $cntnr := $sts.containers }}
-  {{- range $cm := $cntnr.mountConfigMaps }}
-    {{- $stsCMNames = append $stsCMNames $cm.name  }}
-  {{- end }}
-{{- end }}
+# {{- $stsCMNames := list }}
+# {{- range $cntnr := $sts.containers }}
+#   {{- range $cm := $cntnr.mountConfigMaps }}
+#     {{- $stsCMNames = append $stsCMNames $cm.name  }}
+#   {{- end }}
+# {{- end }}
 
-{{- $stsSecNames := list }}
-{{- range $cntnr := $sts.containers }}
-  {{- range $sec := $cntnr.mountSecrets }}
-    {{- $stsSecNames = append $stsSecNames $sec.name  }}
-  {{- end }}
-{{- end }}
+# {{- $stsSecNames := list }}
+# {{- range $cntnr := $sts.containers }}
+#   {{- range $sec := $cntnr.mountSecrets }}
+#     {{- $stsSecNames = append $stsSecNames $sec.name  }}
+#   {{- end }}
+# {{- end }}
 
 ---
 apiVersion: apps/v1
@@ -165,6 +165,16 @@ spec:
             - name: {{ $volumeName }}
               mountPath: {{ $sts.persistence.volumeMountPath }}
 
+          {{- range $cm := $sts.mountConfigMaps }}{{/* # Volume mounts from mountConfigMaps */}}
+            - name: {{$cm.name}}
+              mountPath: {{ $cm.mountPath }}
+          {{- end }}
+
+          {{- range $sec := $sts.mountSecrets }}{{/* # Volume mounts from mountSecrets */}}
+            - name: {{$sec.name}}
+              mountPath: {{ $sec.mountPath }}
+          {{- end }}
+
             {{- if $sts.persistence.extraPVC }}
             - name: extra-data
               mountPath: /extra-data
@@ -173,17 +183,26 @@ spec:
       {{- end }} # {{/* range $kcntnr, $cntnr := $sts.containers */}}
 
       volumes:
-        {{- range $cmn := $stsCMNames }}
-        - name: {{$cmn}}
+        {{- range $cm := $sts.mountConfigMaps }}{{/* # Volume mounts from mountConfigMaps */}}
+        - name: {{$cm.name}}
           configMap:
-            name: {{$cmn}}
+            name: {{$cm.name}}
+          {{- with $cm.items }}
+            items:
+              {{- toYaml . | nindent 14 }}
+          {{- end }}
         {{- end }}
 
-        {{- range $secn := $stsSecNames }}
-        - name: {{$secn}}
+        {{- range $sec := $sts.mountSecrets }}{{/* # Volume mounts from mountSecrets */}}
+        - name: {{$sec.name}}
           secret:
-            secretName: {{$secn}}
+            secretName: {{$sec.name}}
             optional: false
+            defaultMode: {{$sec.defaultMode}}
+          {{- with $sec.items }}
+            items:
+              {{- toYaml . | nindent 14 }}
+          {{- end }}
         {{- end }}
 
         {{- if $sts.persistence.extraPVC }}
