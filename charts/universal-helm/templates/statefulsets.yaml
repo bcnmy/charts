@@ -1,20 +1,6 @@
 {{- range $ksts, $sts := $.Values.statefulset }}
 {{- $volumeName := printf "%s-data" $sts.name }}
 
-# {{- $stsCMNames := list }}
-# {{- range $cntnr := $sts.containers }}
-#   {{- range $cm := $cntnr.mountConfigMaps }}
-#     {{- $stsCMNames = append $stsCMNames $cm.name  }}
-#   {{- end }}
-# {{- end }}
-
-# {{- $stsSecNames := list }}
-# {{- range $cntnr := $sts.containers }}
-#   {{- range $sec := $cntnr.mountSecrets }}
-#     {{- $stsSecNames = append $stsSecNames $sec.name  }}
-#   {{- end }}
-# {{- end }}
-
 ---
 apiVersion: apps/v1
 kind: StatefulSet
