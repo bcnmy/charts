@@ -72,44 +72,50 @@ spec:
       {{- end }}
 
       initContainers:
-      {{- range $kcntnr, $cntnr := $sts.containers }}
-      {{- if or $cntnr.mountConfigMaps $cntnr.mountSecrets }}
-      {{ $cmPref := "/cm" }}
-      {{ $secPref := "/sec" }}
-      - name: cp-configs
-        image: alpine:latest
-        workingDir: {{ $sts.persistence.volumeMountPath }}
-        command:
-          - 'sh'
-          - '-c'
-          - |
-            set -exu
-          {{- range $cm := (concat (default (list ) $cntnr.mountConfigMaps) (default (list ) $cntnr.mountSecrets)) }}
-            mkdir -p {{$cm.targetPath}}
-            cp -f /{{$cm.name}}/* {{$cm.targetPath}}
+      {{- range $kcntnr, $cntnr := $sts.initContainers }}
+        - name: {{ $kcntnr }}
+          image: "{{ $cntnr.image.repository }}:{{ $cntnr.image.tag }}"
+          imagePullPolicy: {{ default "IfNotPresent" $cntnr.image.imagePullPolicy }}
+          {{- with $cntnr.envFrom }}
+          envFrom: {{- toYaml . | nindent 12}}
           {{- end }}
-        volumeMounts:
-          - name: {{ $volumeName }}
-            mountPath: {{ $sts.persistence.volumeMountPath }}
+          {{- with $cntnr.env }}
+          env: {{- toYaml . | nindent 12}}
+          {{- end }}
+          {{- with $cntnr.workingDir }}
+          workingDir: {{ . }}
+          {{- end }}
+          {{- with $cntnr.command }}
+          command: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $cntnr.args }}
+          args: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $cntnr.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- range $kprt, $prt := $cntnr.ports }}
+          ports:
+            - name:  {{ $prt.name}}
+              protocol: {{ $prt.protocol }}
+              containerPort: {{ $prt.port }}
+          {{- end }}
+          volumeMounts:
+          {{- if $sts.persistence }} {{ if $sts.persistence.volumeClaimTemplates}} {{if $sts.persistence.volumeClaimTemplates.volumeMountPath }}
+            - name: {{ $volumeName }}
+              mountPath: {{ $sts.persistence.volumeClaimTemplates.volumeMountPath }}
+          {{- end }}{{end}}{{end}}
 
-          # Volume mounts from mountConfigMaps
-          {{- range $cm := $cntnr.mountConfigMaps }}
-          - name: {{$cm.name}}
-            mountPath: /{{ $cm.name }}
+          {{- range $cm := $sts.mountConfigMaps }}{{/* # Volume mounts from mountConfigMaps */}}
+            - name: {{$cm.name}}
+              mountPath: {{ $cm.mountPath }}
           {{- end }}
 
-          # Volume mounts from mountSecrets
-          {{- range $sec := $cntnr.mountSecrets }}
-          - name: {{$sec.name}}
-            mountPath: /{{ $sec.name }}
-            readOnly: true
+          {{- range $sec := $sts.mountSecrets }}{{/* # Volume mounts from mountSecrets */}}
+            - name: {{$sec.name}}
+              mountPath: {{ $sec.mountPath }}
           {{- end }}
-      {{- end }}
-      {{- end }} #{{/* range $kcntnr, $cntnr := $sts.containers */}}
-
-      {{- with $sts.initContainers }}
-        {{- toYaml . | nindent 6 }}
-      {{- end }}
+      {{- end }}  {{/* #range $kcntnr, $cntnr := $sts.initContainers */}}
 
       {{- with $sts.imagePullSecrets }}
       imagePullSecrets: {{ toYaml . | nindent 8 }}
@@ -119,7 +125,7 @@ spec:
 
         - name: {{ $cntnr.name }}
           image: "{{ $cntnr.image.repository }}:{{ $cntnr.image.tag }}"
-          imagePullPolicy: {{ default "IfNotPresent" $cntnr.image.imagePullPolicy}}
+          imagePullPolicy: {{ default "IfNotPresent" $cntnr.image.imagePullPolicy }}
 
           {{- with $cntnr.envFrom }}
           envFrom: {{- toYaml . | nindent 12}}
