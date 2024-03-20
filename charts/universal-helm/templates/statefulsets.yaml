@@ -100,6 +100,7 @@ spec:
           {{- range $sec := $sts.mountSecrets }}{{/* # Volume mounts from mountSecrets */}}
             - name: {{$sec.name}}
               mountPath: {{ $sec.mountPath }}
+              subPath: {{ $sec.subPath }}
           {{- end }}
       {{- end }}  {{/* #range $kcntnr, $cntnr := $sts.initContainers */}}
 
@@ -160,11 +161,13 @@ spec:
           {{- range $cm := $sts.mountConfigMaps }}{{/* # Volume mounts from mountConfigMaps */}}
             - name: {{$cm.name}}
               mountPath: {{ $cm.mountPath }}
+              subPath: {{ $cm.subPath }}
           {{- end }}
 
           {{- range $sec := $sts.mountSecrets }}{{/* # Volume mounts from mountSecrets */}}
             - name: {{$sec.name}}
               mountPath: {{ $sec.mountPath }}
+              subPath: {{ $sec.subPath }}
           {{- end }}
 
             {{- if $sts.persistence.extraPVC }}
