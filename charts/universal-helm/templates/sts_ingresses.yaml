@@ -8,9 +8,9 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{$nsts}}-{{ $prt.name }}
+  name: {{$sts.name}}-{{ $prt.name }}
   labels:
-    {{- include "universal-helm.labels" . | nindent 4 }}
+    {{- include "universal-helm.labels" $ | nindent 4 }}
   {{- with $prt.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -48,7 +48,7 @@ spec:
             {{- else }}
             backend:
               service:
-                name: {{$nsts}}-{{ $prt.name }}
+                name: {{$sts.name}}-{{ $prt.name }}
                 port:
                   number: {{ $prt.port }}
             {{- end }}
