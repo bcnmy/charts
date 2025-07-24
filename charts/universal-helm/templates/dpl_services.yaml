@@ -1,0 +1,36 @@
+{{- range $ndpl, $dpl := $.Values.deployments }}
+{{- range $kcntnr, $cntnr := $dpl.containers }}
+{{- range $kprt, $prt := $cntnr.ports }}
+
+{{- if $prt.service }}
+{{- if or $prt.service.enabled (not (has $prt.service .enabled)) }}{{/* # If enabled==true or not given*/}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{$kcntnr}}-{{ $prt.name }}
+  namespace: {{ $dpl.namespace | default "default" }}
+  labels:
+    {{- include "universal-helm.labels" $ | nindent 4 }}
+
+  {{ with $prt.service.annotations }}
+  annotations:
+        {{- toYaml . | nindent 4 }}
+  {{ end }}
+spec:
+  selector:
+    app: {{ $ndpl }}
+  type: {{ $prt.service.type | default "ClusterIP" }}
+  ports:
+    - port: {{ $prt.port }}
+      targetPort: {{ $prt.containerPort }}
+      protocol: {{ $prt.protocol }}
+      name: {{ $prt.name }}
+
+{{- /* if $prt.serviceMonitor */ -}}
+{{- /* end */ -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}

@@ -1,0 +1,140 @@
+{{- /* Generate deployments from the deployments map */ -}}
+{{- range $deploymentName, $deployment := .Values.deployments }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $deploymentName }}
+  namespace: {{ $deployment.namespace | default "default" }}
+  labels:
+    {{- include "universal-helm.labels" $ | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ $deploymentName }}
+  replicas: {{ $deployment.replicas | default 1 }}
+  template:
+    metadata:
+      name: {{ $deploymentName }}
+      labels:
+        {{- include "universal-helm.labels" $ | nindent 8 }}
+        app: {{ $deploymentName }}
+      annotations:
+        releaseTime: {{ dateInZone "2006-01-02 15:04:05Z" (now) "UTC"| quote }}
+    spec:
+      {{- with $.Values.global.securityContext }}
+      securityContext: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.global.serviceAccount.name }}
+      serviceAccountName: {{ . }}
+      {{- end }}
+
+      containers:
+      {{- range $kcntnr, $cntnr := $deployment.containers }}
+        - name: {{ $kcntnr }}
+          image: "{{ $cntnr.image.repository }}:{{ $cntnr.image.tag }}"
+          imagePullPolicy: {{ $cntnr.image.imagePullPolicy | default "Always" }}
+          {{- with $cntnr.envFrom }}
+          envFrom: {{- toYaml . | nindent 12}}
+          {{- end }}
+          {{- with $cntnr.env }}
+          env: {{- toYaml . | nindent 12}}
+          {{- end }}
+          {{- with $cntnr.workingDir }}
+          workingDir: {{ . }}
+          {{- end }}
+          {{- with $cntnr.command }}
+          command: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $cntnr.args }}
+          args: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $cntnr.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- range $kprt, $prt := $cntnr.ports }}
+          ports:
+            - name:  {{ $prt.name}}
+              protocol: {{ $prt.protocol }}
+              containerPort: {{ $prt.containerPort }}
+          {{- end }}
+
+          volumeMounts:
+            {{- with $cntnr.mountConfigMaps }}
+              {{- range $cm := . }}
+            - name: {{ $cm.name }}
+              mountPath: {{ $cm.mountPath }}
+              {{- end }}
+            {{- end }}
+
+            {{- with $cntnr.mountSecrets }}
+              {{- range $sec := . }}{{/* # general Volume mounts from mountSecrets */}}
+            - name: {{$sec.name}}
+              mountPath: {{ $sec.mountPath }}
+              subPath: {{ $sec.subPath }}
+              defaultMode: {{ $sec.defaultMode }}
+              {{- with $sec.items }}
+              items:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- end }}  
+            {{- end }}
+
+            {{- range $chain, $config := $cntnr.nodeEnabledChains }}
+              {{- range $key, $value := $config }}
+            - name: secret-{{ $key }}-config
+              mountPath: /usr/src/app/chains/{{ $value }}.json 
+              subPath: {{ $value }}.json 
+              {{- end }}
+            {{- end }}
+
+
+          {{- with $cntnr.lifecycle }}
+          lifecycle: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with (default (list ) $cntnr.startupProbe) }}
+          startupProbe: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with (default (list ) $cntnr.livenessProbe) }}
+          livenessProbe: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with (default (list ) $cntnr.readinessProbe) }}
+          readinessProbe: {{- toYaml . | nindent 12 }}
+          {{- end }}
+        {{- end }}
+      
+
+      volumes:
+        {{- if $deployment.volumeConfigMaps }}
+          {{- range $cm := $deployment.volumeConfigMaps }}
+        - name: {{$cm.name}}
+          configMap:
+            name: {{$cm.name}}
+          {{- with $cm.items }}
+            items:
+              {{- toYaml . | nindent 14 }}
+          {{- end }}
+          {{- end }}
+        {{- end }}
+
+        {{- if $deployment.volumeSecrets }}
+          {{- range $sec := $deployment.volumeSecrets }}
+        - name: {{$sec.name}}
+          secret:
+            secretName: {{$sec.name}}
+            optional: false
+          {{- with $sec.items }}
+            items:
+              {{- toYaml . | nindent 14 }}
+          {{- end }}
+          {{- end }}
+        {{- end }}
+
+        {{- if $deployment.supported_chains }}
+          {{- range $chain, $config := $deployment.supported_chains }}
+        - name: secret-{{ $chain }}-config
+          secret:
+            secretName: {{ $deploymentName }}-{{ $chain }}-{{ $config.chain_id }}-config
+          {{- end }}
+        {{- end }}
+    {{- end }} {{/* #range $deploymentName, $deployment := $.Values.deployments */}}

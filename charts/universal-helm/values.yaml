@@ -1,0 +1,246 @@
+fullnameOverride: mee-node
+
+# Global configuration
+global:
+  serviceAccount:
+    create: false
+    name: mee-node
+  securityContext:
+    fsGroup: 10001
+    runAsUser: 10000
+    runAsGroup: 10001
+
+# Deployments configuration
+deployments:
+  mee-node:
+    projectID: "biconomy-staging"
+    namespace: "mee-node"
+    replicas: 1
+    commonSecrets:
+      stg-mee-node-secret-envs:
+        - PORT
+        - NODE_FEE_BENEFICIARY
+        - REDIS_HOST
+        - ENV_ENC_PASSWORD
+        - GLUEX_PARTNER_UNIQUE_ID
+        - GLUEX_API_KEY
+        - LIFI_API_KEY
+    supported_chains:
+      eth:
+        chain_id: "1"
+        secret:
+          key: "stg-mee-mode-eth-config"
+          name: "1.json"
+    volumeSecrets:
+      - name: stg-mee-mode-0-key-enc
+      - name: stg-mee-mode-1-key-enc
+    containers:
+      mee-node-0:
+        image:
+          repository: "us-west1-docker.pkg.dev/artifact-registry-1191/mee-node/mee-node"
+          tag: "latest"
+          imagePullPolicy: Always
+        ports:
+          - name: http
+            port: 8080
+            containerPort: 3000
+            protocol: TCP
+            service:
+              type: ClusterIP
+            ingress:
+              annotations:
+                cert-manager.io/cluster-issuer: letsencrypt
+                kubernetes.io/tls-acme: "true"
+                cert-manager.io/acme-challenge-type: http01
+                ingress.kubernetes.io/force-ssl-redirect: "true"
+              className: kong
+              hosts:
+              - host: "mee-node-0-staging.biconomy.io"
+                paths:
+                  - path: /info/
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: mee-node-0-http
+                        port:
+                          number: 8080
+                  - path: /docs/
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: mee-node-0-http
+                        port:
+                          number: 8080
+                  - path: /v1/
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: mee-node-0-http
+                        port:
+                          number: 8080
+                  - path: /v2/
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: mee-node-0-http
+                        port:
+                          number: 8080
+                  - path: /v3/
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: mee-node-0-http
+                        port:
+                          number: 8080                          
+              tls:
+                - secretName: mee-node-0-tls
+                  hosts:
+                    - "mee-node-0-staging.biconomy.io"
+        resources:
+          requests:
+            memory: "3000Mi"
+            cpu: 1
+          limits:
+            memory: "4000Mi"
+        envFrom:
+          - secretRef:
+              name: stg-mee-node-secret-envs
+        nodeSecrets:
+          stg-mee-mode-0-key-enc:
+            - key.enc
+        nodeEnabledChains: 
+          - eth: 1
+        mountSecrets:
+          - name: stg-mee-mode-0-key-enc
+            mountPath: /usr/src/app/keystore/key.enc
+            subPath: "key.enc"
+            defaultMode: 511
+            items:
+            - key: key.enc
+              path: key.enc
+        env:
+          - name: LOG_LEVEL
+            value: "trace"
+          - name: SIMULATOR_QUEUE_JOB_ATTEMPTS
+            value: '3'
+          - name: DEFAULT_SIMULATOR_WORKER_CONCURRENCY
+            value: "50"
+          - name: DEFAULT_NUM_SIMULATOR_WORKERS_PER_CHAIN
+            value: "3"
+          - name: MAX_EXTRA_WORKERS
+            value: "5"
+          - name: NODE_NAME
+            value: "MEE_NODE_STAGING"
+          - name: NODE_ENV
+            value: "staging"
+          - name: REDIS_PORT
+            value: "6379"
+          - name: PORT
+            value: "3000"
+    
+      mee-node-1:
+        image:
+          repository: "us-west1-docker.pkg.dev/artifact-registry-1191/mee-node/mee-node"
+          tag: "latest"
+          imagePullPolicy: Always
+        ports:
+          - name: http
+            port: 8080
+            containerPort: 3000
+            protocol: TCP
+            service:
+              type: ClusterIP
+            ingress:
+              annotations:
+                cert-manager.io/cluster-issuer: letsencrypt
+                kubernetes.io/tls-acme: "true"
+                cert-manager.io/acme-challenge-type: http01
+                ingress.kubernetes.io/force-ssl-redirect: "true"
+              className: kong
+              hosts:
+              - host: "mee-node-1-staging.biconomy.io"
+                paths:
+                  - path: /info/
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: mee-node-1-http
+                        port:
+                          number: 8080
+                  - path: /docs/
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: mee-node-1-http
+                        port:
+                          number: 8080
+                  - path: /v1/
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: mee-node-1-http
+                        port:
+                          number: 8080
+                  - path: /v2/
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: mee-node-1-http
+                        port:
+                          number: 8080
+                  - path: /v3/
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: mee-node-1-http
+                        port:
+                          number: 8080                          
+              tls:
+                - secretName: mee-node-1-tls
+                  hosts:
+                    - "mee-node-1-staging.biconomy.io"
+        resources:
+          requests:
+            memory: "3000Mi"
+            cpu: 1
+          limits:
+            memory: "4000Mi"
+        envFrom:
+          - secretRef:
+              name: stg-mee-node-secret-envs
+        nodeSecrets:
+          stg-mee-mode-1-key-enc:
+            - key.enc
+        nodeEnabledChains: 
+          - eth: 1
+        mountSecrets:
+          - name: stg-mee-mode-1-key-enc
+            mountPath: /usr/src/app/keystore/key.enc
+            subPath: "key.enc"
+            defaultMode: 511
+            items:
+              - key: key.enc
+                path: key.enc
+        env:
+          - name: LOG_LEVEL
+            value: "trace"
+          - name: SIMULATOR_QUEUE_JOB_ATTEMPTS
+            value: '3'
+          - name: DEFAULT_SIMULATOR_WORKER_CONCURRENCY
+            value: "50"
+          - name: DEFAULT_NUM_SIMULATOR_WORKERS_PER_CHAIN
+            value: "3"
+          - name: MAX_EXTRA_WORKERS
+            value: "5"
+          - name: NODE_NAME
+            value: "MEE_NODE_STAGING"
+          - name: NODE_ENV
+            value: "staging"
+          - name: REDIS_PORT
+            value: "6379"
+          - name: PORT
+            value: "3000"
+
+# Additional manifests
+additionalManifests: []
+additionalYamlManifests: ""
