@@ -71,7 +71,12 @@ spec:
               {{- range $sec := . }}{{/* # general Volume mounts from mountSecrets */}}
             - name: {{$sec.name}}
               mountPath: {{ $sec.mountPath }}
+              {{- if $sec.subPath }}
               subPath: {{ $sec.subPath }}
+              {{- end }}
+              {{- if $sec.defaultMode }}
+              defaultMode: {{ $sec.defaultMode }}
+              {{- end }}
               {{- with $sec.items }}
               items:
                 {{- toYaml . | nindent 16 }}
