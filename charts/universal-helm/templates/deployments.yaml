@@ -72,7 +72,6 @@ spec:
             - name: {{$sec.name}}
               mountPath: {{ $sec.mountPath }}
               subPath: {{ $sec.subPath }}
-              defaultMode: {{ $sec.defaultMode }}
               {{- with $sec.items }}
               items:
                 {{- toYaml . | nindent 16 }}
