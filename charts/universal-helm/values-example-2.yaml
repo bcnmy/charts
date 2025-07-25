@@ -16,15 +16,6 @@ deployments:
     projectID: "biconomy-staging"
     namespace: "mee-node"
     replicas: 1
-    commonSecrets:
-      stg-mee-node-secret-envs:
-        - PORT
-        - NODE_FEE_BENEFICIARY
-        - REDIS_HOST
-        - ENV_ENC_PASSWORD
-        - GLUEX_PARTNER_UNIQUE_ID
-        - GLUEX_API_KEY
-        - LIFI_API_KEY
     supported_chains:
       eth:
         chain_id: "1"
@@ -104,8 +95,15 @@ deployments:
             memory: "4000Mi"
         envFrom:
           - secretRef:
-              name: stg-mee-node-secret-envs
+              name: stg-mee-node-0-secret-envs
         nodeSecrets:
+          stg-mee-node-0-secret-envs:
+            - NODE_FEE_BENEFICIARY
+            - REDIS_HOST
+            - ENV_ENC_PASSWORD
+            - GLUEX_PARTNER_UNIQUE_ID
+            - GLUEX_API_KEY
+            - LIFI_API_KEY
           stg-mee-mode-0-key-enc:
             - key.enc
         nodeEnabledChains: 
@@ -207,8 +205,15 @@ deployments:
             memory: "4000Mi"
         envFrom:
           - secretRef:
-              name: stg-mee-node-secret-envs
+              name: stg-mee-node-1-secret-envs
         nodeSecrets:
+          stg-mee-node-1-secret-envs:
+            - NODE_FEE_BENEFICIARY
+            - REDIS_HOST
+            - ENV_ENC_PASSWORD
+            - GLUEX_PARTNER_UNIQUE_ID
+            - GLUEX_API_KEY
+            - LIFI_API_KEY
           stg-mee-mode-1-key-enc:
             - key.enc
         nodeEnabledChains: 
