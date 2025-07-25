@@ -109,6 +109,14 @@ spec:
       
 
       volumes:
+
+        {{- if $deployment.volumeEmptyDirs}}
+          {{- range $cm := $deployment.volumeEmptyDirs }}
+        - name: {{$cm.name}}
+          emptyDir: {}
+          {{- end }}
+        {{- end }}
+
         {{- if $deployment.volumeConfigMaps }}
           {{- range $cm := $deployment.volumeConfigMaps }}
         - name: {{$cm.name}}
