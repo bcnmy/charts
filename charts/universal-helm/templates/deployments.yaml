@@ -28,7 +28,6 @@ spec:
       {{- with $.Values.global.serviceAccount.name }}
       serviceAccountName: {{ . }}
       {{- end }}
-
       containers:
       {{- range $kcntnr, $cntnr := $deployment.containers }}
         - name: {{ $kcntnr }}
@@ -105,8 +104,44 @@ spec:
           {{- with (default (list ) $cntnr.readinessProbe) }}
           readinessProbe: {{- toYaml . | nindent 12 }}
           {{- end }}
-        {{- end }}
-      
+
+          {{/* Affinity & Tolerations */}}
+          {{- with $cntnr.affinity }}
+          affinity:
+            {{- with .antiAffinity }}
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: {{ .weight | default 100 }}
+                  podAffinityTerm:
+                    labelSelector:
+                      matchExpressions:
+                        - key: app
+                          operator: In
+                          values:
+                            - {{ $deploymentName }}
+                    topologyKey: {{ .topologyKey | default "kubernetes.io/hostname" }}
+            {{- end }}
+            {{- with .nodeAffinity }}
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: {{ .key }}
+                        operator: In
+                        values:
+                          - {{ .values }}
+            {{- end }}
+          {{- end }}
+          {{- with $cntnr.affinity }}
+            {{- with .affinityTolerations }}
+          tolerations:
+            - key: {{ .key }}
+              operator: Equal
+              value: {{ .values }}
+              effect: NoSchedule
+            {{- end }}
+          {{- end }}
+      {{- end }}
 
       volumes:
 
