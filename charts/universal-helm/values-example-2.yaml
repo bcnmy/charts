@@ -25,6 +25,8 @@ deployments:
     volumeSecrets:
       - name: stg-mee-mode-0-key-enc
       - name: stg-mee-mode-1-key-enc
+    volumeEmptyDirs:
+      - name: logs-volume
     containers:
       mee-node-0:
         image:
@@ -105,17 +107,13 @@ deployments:
             - GLUEX_API_KEY
             - LIFI_API_KEY
           stg-mee-mode-0-key-enc:
-            - key.enc
+            - key.enc: null
         nodeEnabledChains: 
           - eth: 1
         mountSecrets:
           - name: stg-mee-mode-0-key-enc
             mountPath: /usr/src/app/keystore/key.enc
             subPath: "key.enc"
-            defaultMode: 511
-            items:
-            - key: key.enc
-              path: key.enc
         env:
           - name: LOG_LEVEL
             value: "trace"
@@ -197,6 +195,11 @@ deployments:
                 - secretName: mee-node-1-tls
                   hosts:
                     - "mee-node-1-staging.biconomy.io"
+        affinity:
+          affinityTolerations:
+            enable: true
+            key: "app"
+            values: "mee-node-1"
         resources:
           requests:
             memory: "3000Mi"
@@ -222,10 +225,8 @@ deployments:
           - name: stg-mee-mode-1-key-enc
             mountPath: /usr/src/app/keystore/key.enc
             subPath: "key.enc"
-            defaultMode: 511
-            items:
-              - key: key.enc
-                path: key.enc
+          - name: logs-volume
+            mountPath: /usr/src/app/logs
         env:
           - name: LOG_LEVEL
             value: "trace"
@@ -249,3 +250,7 @@ deployments:
 # Additional manifests
 additionalManifests: []
 additionalYamlManifests: ""
+
+# redis is deployed seperately in mee-node-redis namespace using values.redis.yaml
+redis:
+  enabled: false
