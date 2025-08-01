@@ -32,7 +32,7 @@ spec:
       containers:
       {{- range $kcntnr, $cntnr := $deployment.containers }}
         - name: {{ $kcntnr }}
-          image: "{{ $cntnr.image.repository }}:{{ $cntnr.image.tag }}"
+          image: "{{ $cntnr.image.repository }}:{{ $.Values.image_tag }}"
           imagePullPolicy: {{ $cntnr.image.imagePullPolicy | default "Always" }}
           {{- with $cntnr.envFrom }}
           envFrom: {{- toYaml . | nindent 12}}
