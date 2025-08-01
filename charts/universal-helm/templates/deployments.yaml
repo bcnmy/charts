@@ -32,8 +32,8 @@ spec:
       containers:
       {{- range $kcntnr, $cntnr := $deployment.containers }}
         - name: {{ $kcntnr }}
-          image: "{{ $cntnr.image.repository }}:{{ $.Values.image_tag }}"
-          imagePullPolicy: {{ $cntnr.image.imagePullPolicy | default "Always" }}
+          image: "{{ $deployment.image.repository }}:{{ $deployment.image.tag }}"
+          imagePullPolicy: {{ $deployment.image.imagePullPolicy | default "Always" }}
           {{- with $cntnr.envFrom }}
           envFrom: {{- toYaml . | nindent 12}}
           {{- end }}
