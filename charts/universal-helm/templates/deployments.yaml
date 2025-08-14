@@ -87,8 +87,8 @@ spec:
             {{- range $chain, $config := $cntnr.nodeEnabledChains }}
               {{- range $key, $value := $config }}
             - name: secret-{{ $key }}-config
-              mountPath: /usr/src/app/chains/{{ $value }}.json 
-              subPath: {{ $value }}.json 
+              mountPath: /usr/src/app/chains/{{ printf "%d" (int $value) }}.json
+              subPath: {{ printf "%d" (int $value) }}.json
               {{- end }}
             {{- end }}
 
