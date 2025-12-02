@@ -16,6 +16,9 @@ metadata:
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+{{- with $prt.ingress.proxy }}
+    {{- toYaml . | nindent 4 }}
+{{- end }}
 spec:
   {{- with $prt.ingress.className }}
   ingressClassName: {{ . }}
