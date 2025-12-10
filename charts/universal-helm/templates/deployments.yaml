@@ -29,17 +29,17 @@ spec:
       serviceAccountName: {{ . }}
       {{- end }}
       affinity:
-      {{- if $deployment.affinity.podantiAffinity.enable }}
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: app
-                operator: In
-                values:
-                - {{ $deployment.name }}
-            topologyKey:  {{ .deployment.affinity.podantiAffinity.topologyKey }}
-      {{- end }}
+      # {{- if $deployment.affinity.podantiAffinity.enable }}
+      #   podAntiAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #     - labelSelector:
+      #         matchExpressions:
+      #         - key: app
+      #           operator: In
+      #           values:
+      #           - {{ $deployment.name }}
+      #       topologyKey:  {{ .deployment.affinity.podantiAffinity.topologyKey }}
+      # {{- end }}
       {{- if $deployment.affinity.nodeAffinity.enable }}
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
