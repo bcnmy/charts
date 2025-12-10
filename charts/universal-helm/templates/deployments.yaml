@@ -29,7 +29,7 @@ spec:
       serviceAccountName: {{ . }}
       {{- end }}
       affinity:
-      {{- if $deployment.affinity.nodeAffinity }}
+      {{- if $deployment.affinity.nodeAffinity.enable }}
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
