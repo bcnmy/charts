@@ -29,7 +29,7 @@ spec:
       serviceAccountName: {{ . }}
       {{- end }}
       affinity:
-      {{- if $deployment.affinity.nodeAffinity.enable }}
+      {{- if $deployment.affinity.nodeAffinity }}
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -44,7 +44,6 @@ spec:
         operator: Equal
         value: {{ $deployment.affinity.nodeAffinity.values }}
       {{- end }}
-
       containers:
       {{- range $kcntnr, $cntnr := $deployment.containers }}
         - name: {{ $kcntnr }}
