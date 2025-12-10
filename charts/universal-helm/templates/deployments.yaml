@@ -28,6 +28,33 @@ spec:
       {{- with $.Values.global.serviceAccount.name }}
       serviceAccountName: {{ . }}
       {{- end }}
+      affinity:
+      {{- if $deployment.affinity.podantiAffinity.enable }}
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - {{ $deployment.name }}
+            topologyKey:  {{ .deployment.affinity.podantiAffinity.topologyKey }}
+      {{- end }}
+      {{- if $deployment.affinity.nodeAffinity.enable }}
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: {{ $deployment.affinity.nodeAffinity.key }}
+                operator: In
+                values:
+                - {{ $deployment.affinity.nodeAffinity.values }}
+      tolerations:
+      - effect: NoSchedule
+        key: {{ $deployment.affinity.nodeAffinity.key }}
+        operator: Equal
+        value: {{ $deployment.affinity.nodeAffinity.values }}
+      {{- end }}
 
       containers:
       {{- range $kcntnr, $cntnr := $deployment.containers }}
