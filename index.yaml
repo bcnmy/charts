@@ -21,6 +21,15 @@ entries:
     version: 0.0.1
   universal-helm:
   - apiVersion: v2
+    created: "2026-02-17T14:53:51.943576686Z"
+    description: A Universal Helm chart
+    digest: f1cab80cc18854042234243233a1c365bb88993363b82e60856f50c64f3f56ba
+    name: universal-helm
+    type: application
+    urls:
+    - https://github.com/bcnmy/charts/releases/download/universal-helm-1.0.2/universal-helm-1.0.2.tgz
+    version: 1.0.2
+  - apiVersion: v2
     created: "2026-02-17T14:19:36.856558241Z"
     description: A Universal Helm chart
     digest: 0808af6a7ba505bb1f4ec59941bd7f9bdacff2ef689c6d0331a127af1b86c521
@@ -290,4 +299,4 @@ entries:
     urls:
     - https://github.com/bcnmy/charts/releases/download/universal-helm-0.0.1/universal-helm-0.0.1.tgz
     version: 0.0.1
-generated: "2026-02-17T14:19:36.856885096Z"
+generated: "2026-02-17T14:53:51.94395032Z"
