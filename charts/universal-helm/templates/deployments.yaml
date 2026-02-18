@@ -163,7 +163,7 @@ spec:
           {{- range $key, $value := $config }}
         - name: secret-{{ $key }}-config
           secret:
-            secretName: {{ $.Values.fullnameOverride }}-{{ $key }}-{{ $value }}-configs
+            secretName: {{ $.Values.fullnameOverride }}-{{ $key }}-{{ printf "%d" (int $value) }}-configs
           {{- end }}
           {{- end }}
           {{- end }}
