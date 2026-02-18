@@ -157,11 +157,16 @@ spec:
           {{- end }}
         {{- end }}
 
-        {{- if $.Values.global.supported_chains }}
-          {{- range $chain, $config := $.Values.global.supported_chains }}
-        - name: secret-{{ $chain }}-config
+        {{- range $kcntnr, $cntnr := $deployment.containers }}
+          {{- if $cntnr.nodeEnabledChains }}
+          {{- range $chain, $config := $cntnr.nodeEnabledChains }}
+          {{- range $key, $value := $config }}
+        - name: secret-{{ $key }}-config
           secret:
-            secretName: {{ $.Values.fullnameOverride }}-{{ $chain }}-{{ $config.chain_id }}-configs
+            secretName: {{ $.Values.fullnameOverride }}-{{ $key }}-{{ $value }}-configs
+          {{- end }}
+          {{- end }}
           {{- end }}
         {{- end }}
+
     {{- end }} {{/* #range $deploymentName, $deployment := $.Values.deployments */}}
